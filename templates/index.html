@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Password Strength Checker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .container {
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .gauge {
+            width: 200px;
+            height: 100px;
+            margin: 30px auto;
+        }
+
+        #needle {
+            transform-origin: 50% 100%;
+            transition: transform 0.8s ease-in-out;
+        }
+
+        .password-container {
+            position: relative;
+            width: 50%;
+            margin: auto;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 8px;
+            cursor: pointer;
+        }
+
+        .gauge-path {
+            stroke-width: 10;
+            fill: none;
+        }
+
+        @keyframes blink-red {
+    0% { background-color: #f8d7da; }
+    50% { background-color: #ffffff; }
+    100% { background-color: #f8d7da; }
+}
+
+@keyframes blink-yellow {
+    0% { background-color: #fff3cd; }
+    50% { background-color: #ffffff; }
+    100% { background-color: #fff3cd; }
+}
+
+@keyframes blink-green {
+    0% { background-color: #d4edda; }
+    50% { background-color: #ffffff; }
+    100% { background-color: #d4edda; }
+}
+
+.blink-red { animation: blink-red 1s ease-in-out 3; }
+.blink-yellow { animation: blink-yellow 1s ease-in-out 3; }
+.blink-green { animation: blink-green 1s ease-in-out 3; }
+
+    </style>
+</head>
+<body>
+    <div class="container" id="main-container">
+        <h1 class="mb-4">Password Strength Checker</h1>
+        <form method="POST">
+            <div class="password-container mb-3">
+                <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required>
+                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+            </div>
+            <button type="submit" class="btn btn-primary mb-2">Check Strength</button>
+        </form>
+
+        {% if prediction %}
+            <div class="mt-4">
+                <h3>{{ prediction }}</h3>
+                <div class="gauge">
+                    <svg width="220" height="130" viewBox="0 0 220 130">
+                        <!-- Arc Background -->
+                        <path d="M20,110 A90,90 0 0,1 200,110" stroke-width="20" fill="none" stroke="#ddd" />
+                
+                        <!-- Colored Arc -->
+                        <defs>
+                            <linearGradient id="gauge-gradient">
+                                <stop offset="0%" stop-color="red"/>
+                                <stop offset="50%" stop-color="gold"/>
+                                <stop offset="100%" stop-color="green"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M20,110 A90,90 0 0,1 200,110" stroke="url(#gauge-gradient)" stroke-width="12" fill="none"/>
+                
+                        <!-- Labels -->
+                        <text x="30" y="125" font-size="12">Weak</text>
+                        <text x="105" y="45" font-size="12">Medium</text>
+                        <text x="170" y="125" font-size="12">Strong</text>
+                
+                        <!-- Rotating needle group -->
+                        <g id="needle-group" transform="rotate(0 110 110)">
+                            <line x1="110" y1="110" x2="110" y2="30" stroke="black" stroke-width="4" />
+                        </g>
+                        <circle cx="110" cy="110" r="6" fill="black" />
+                    </svg>
+                </div>
+                
+                
+                <script>
+                    const label = "{{ prediction }}";
+                    const needleGroup = document.getElementById("needle-group");
+                    const body = document.body;
+                
+                    let targetAngle = 0;
+                    let blinkClass = "";
+                
+                    if (label.includes("Weak")) {
+                        targetAngle = -75;   // Left
+                        blinkClass = "blink-red";
+                    } else if (label.includes("Medium")) {
+                        targetAngle = 0;     // Center
+                        blinkClass = "blink-yellow";
+                    } else if (label.includes("Strong")) {
+                        targetAngle = 75;    // Right
+                        blinkClass = "blink-green";
+                    }
+                
+                    let currentAngle = 0;
+                
+                    function animateNeedle() {
+                        if (Math.abs(currentAngle - targetAngle) < 0.5) {
+                            needleGroup.setAttribute("transform", `rotate(${targetAngle} 110 110)`);
+                            return;
+                        }
+                        currentAngle += (targetAngle - currentAngle) * 0.1;
+                        needleGroup.setAttribute("transform", `rotate(${currentAngle} 110 110)`);
+                        requestAnimationFrame(animateNeedle);
+                    }
+                
+                    animateNeedle();
+                
+                    // Apply blinking background
+                    body.classList.remove("blink-red", "blink-yellow", "blink-green");
+                    if (blinkClass) {
+                        body.classList.add(blinkClass);
+                    }
+
+                    function togglePassword() {
+            const pwd = document.getElementById("password");
+            pwd.type = pwd.type === "password" ? "text" : "password";
+        }
+
+                </script>                
+            
+        {% endif %}
+    </div>
+
+   
+</body>
+
+<footer style="background-color: #880E4F; color: white; padding: 12px; margin-top: 40px; width: 1100px;">
+    <img src="{{ url_for('static', filename='padmashree_logo.png') }}" alt="Padmashree College Logo" style="height: 20px; margin-left: 0%;"><br>
+    <p style="margin: 5px 20%;">This is the final year project done for the Padmashree College Affiliated to Nilai University</p>
+    <strong style="margin: 5px 30%;">Project By: Ghrit Kalash Yadav</strong>
+</footer>
+
+
+</html>
